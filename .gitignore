@@ -1,0 +1,30 @@
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/.venv/
+**/venv/
+**/.pytest_cache/
+
+# Node
+**/node_modules/
+**/dist/
+**/.vite/
+
+# Database & Environment Secrets
+**/*.db
+**/*.sqlite3
+**/.env
+!.env.example
+!**/.env.example
+
+# Logs and OS
+*.log
+**/*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Uploads
+uploads/
+govguide-ai/backend/uploads/

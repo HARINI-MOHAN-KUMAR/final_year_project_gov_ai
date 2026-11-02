@@ -1,0 +1,64 @@
+# ============================================================
+# GovGuide AI — .gitignore
+# ============================================================
+
+# ----- Python -----
+backend/.venv/
+backend/venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ----- pytest / coverage -----
+.pytest_cache/
+.coverage
+htmlcov/
+*.coveragerc
+
+# ----- Database -----
+backend/*.db
+backend/*.sqlite
+*.db
+*.sqlite3
+
+# ----- Environment secrets -----
+backend/.env
+.env
+!.env.example
+
+# ----- Node / Frontend -----
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+
+# ----- OS files -----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ----- IDE / Editor -----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ----- ML models (large binaries) -----
+data/*.joblib
+data/*.pkl
+data/faiss_index/
+
+# ----- Logs -----
+*.log
+logs/
+
+# ----- Misc -----
+*.bak
+*.tmp
