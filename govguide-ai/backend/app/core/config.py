@@ -6,7 +6,7 @@ Uses pydantic-settings for type-safe configuration management.
 import json
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 
 
 class Settings(BaseSettings):
@@ -64,6 +64,16 @@ class Settings(BaseSettings):
             except json.JSONDecodeError:
                 return [origin.strip() for origin in v.split(",")]
         return v
+
+    @model_validator(mode="after")
+    def require_production_secret(self):
+        if self.APP_ENV.lower() in {"prod", "production"} and (
+            len(self.SECRET_KEY) < 32
+            or self.SECRET_KEY == "default-insecure-secret-key-change-in-production"
+            or self.SECRET_KEY == "change_me_to_a_long_random_string_at_least_32_chars"
+        ):
+            raise ValueError("Set a unique SECRET_KEY of at least 32 characters in production")
+        return self
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

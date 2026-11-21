@@ -10,17 +10,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - APP_NAME=GovGuide AI
-      - APP_ENV=production
-      - DEBUG=false
-      - SECRET_KEY=replace_with_a_secure_random_key_for_production_32chars
-      - DATABASE_URL=sqlite:///./govguide.db
-      - LLM_PROVIDER=mock
-      - EMAIL_ENABLED=false
-      - CORS_ORIGINS=["http://localhost:8000","http://127.0.0.1:8000"]
+      APP_NAME: GovGuide AI
+      APP_ENV: production
+      DEBUG: "false"
+      SECRET_KEY: "${SECRET_KEY:?Set SECRET_KEY in the environment before deploying}"
+      DATABASE_URL: sqlite:////data/govguide.db
+      LLM_PROVIDER: mock
+      EMAIL_ENABLED: "false"
+      CORS_ORIGINS: '["http://localhost:8000","http://127.0.0.1:8000"]'
     volumes:
       - govguide_data:/app/backend/uploads
-      - govguide_db:/app/backend
+      - govguide_db:/data
 
 volumes:
   govguide_data:

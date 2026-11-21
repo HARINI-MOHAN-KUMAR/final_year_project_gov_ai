@@ -36,6 +36,8 @@ Since the project uses a multi-stage `Dockerfile`, Render will automatically:
 7. Click **Create Web Service**.
 8. Once deployed, Render gives you a live URL like `https://govguide-ai.onrender.com`.
 
+**Persistence:** the free web service has an ephemeral filesystem. SQLite accounts and uploaded documents may be lost on redeploy or restart. For persistent user data, configure `DATABASE_URL` to a PostgreSQL database and use persistent storage or object storage for uploaded files.
+
 ---
 
 ## Option 2: Railway.app (Fastest Docker Deploy)
@@ -60,10 +62,13 @@ If you have a Linux VPS (AWS EC2, DigitalOcean, Linode, Ubuntu):
 git clone <your-repo-url>
 cd final_year_project
 
-# 2. Build and launch with docker-compose
+# 2. Set a unique secret (PowerShell)
+$env:SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(48))"
+
+# 3. Build and launch with docker-compose
 docker compose up -d --build
 
-# 3. Check logs
+# 4. Check logs
 docker compose logs -f
 ```
 
@@ -84,3 +89,5 @@ The application will be live at `http://your-server-ip:8000`.
 2. Framework Preset: **Vite**.
 3. Set Environment Variable:
    - `VITE_API_BASE_URL`: `https://your-backend.onrender.com`
+
+The frontend appends `/api/v1` to this origin. Set the backend `CORS_ORIGINS` to the exact HTTPS Vercel origin. Configure a persistent database and file storage before using this split setup for real user data.
