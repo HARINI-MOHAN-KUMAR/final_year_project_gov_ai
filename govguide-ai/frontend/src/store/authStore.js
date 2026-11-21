@@ -31,6 +31,8 @@ export const useAuthStore = create((set, get) => ({
     set({ language: lang });
   },
 
+  clearError: () => set({ error: null }),
+
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
@@ -46,10 +48,14 @@ export const useAuthStore = create((set, get) => ({
       const userRes = await api.get('/auth/me');
 
       localStorage.setItem('govguide_user', JSON.stringify(userRes.data));
-      set({ token: access_token, user: userRes.data, isLoading: false });
+      set({ token: access_token, user: userRes.data, isLoading: false, error: null });
       return { success: true };
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Login failed. Please check your credentials.';
+      const msg =
+        err.response?.data?.detail ||
+        (err.response?.status === 401
+          ? 'Invalid email or password. Please try again.'
+          : 'Login failed. Please check your credentials.');
       set({ error: msg, isLoading: false });
       return { success: false, error: msg };
     }
@@ -62,7 +68,7 @@ export const useAuthStore = create((set, get) => ({
       // Auto login after registration
       return await get().login(userData.email, userData.password);
     } catch (err) {
-      const msg = err.response?.data?.detail || 'Registration failed.';
+      const msg = err.response?.data?.detail || 'Registration failed. Please try again.';
       set({ error: msg, isLoading: false });
       return { success: false, error: msg };
     }
@@ -71,7 +77,7 @@ export const useAuthStore = create((set, get) => ({
   logout: () => {
     localStorage.removeItem('govguide_token');
     localStorage.removeItem('govguide_user');
-    set({ user: null, token: null });
+    set({ user: null, token: null, error: null });
   },
 
   fetchProfile: async () => {
@@ -93,8 +99,9 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem('govguide_user', JSON.stringify(res.data));
       return { success: true, data: res.data };
     } catch (err) {
-      set({ isLoading: false, error: err.message });
-      return { success: false, error: err.message };
+      const msg = err.response?.data?.detail || err.message || 'Update failed.';
+      set({ isLoading: false, error: msg });
+      return { success: false, error: msg };
     }
   },
 }));

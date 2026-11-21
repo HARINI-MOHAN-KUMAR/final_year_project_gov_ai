@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register, isLoading, error } = useAuthStore();
+  const { register, isLoading, error, clearError } = useAuthStore();
+
+  useEffect(() => {
+    clearError();
+  }, []);
 
   const [formData, setFormData] = useState({
     email: '',

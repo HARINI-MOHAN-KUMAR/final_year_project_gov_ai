@@ -19,3 +19,13 @@ services:
         value: mock
       - key: EMAIL_ENABLED
         value: "false"
+      - key: DATABASE_URL
+        value: sqlite:///./govguide.db
+      - key: TESSERACT_CMD
+        value: /usr/bin/tesseract
+      - key: CORS_ORIGINS
+        value: '["https://govguide-ai.onrender.com","http://localhost:5173","http://localhost:3000"]'
+      - key: FRONTEND_URL
+        value: https://govguide-ai.onrender.com
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "120"

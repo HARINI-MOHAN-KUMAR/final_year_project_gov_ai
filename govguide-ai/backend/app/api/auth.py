@@ -84,10 +84,10 @@ async def login(
     if user is None or not verify_password(password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
+            detail="Invalid email or password. Please check your credentials and try again.",
         )
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
+        raise HTTPException(status_code=403, detail="Your account has been deactivated. Please contact support.")
 
     token = create_access_token({"sub": str(user.id)})
     return Token(

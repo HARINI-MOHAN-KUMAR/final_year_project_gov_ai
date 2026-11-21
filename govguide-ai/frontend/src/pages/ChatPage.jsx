@@ -65,11 +65,23 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, botMsg]);
     } catch (err) {
       console.error(err);
+      const isNetworkError = !err.response;
+      const statusCode = err.response?.status;
+      let errorMsg = 'Sorry, I encountered an issue. Please try again.';
+
+      if (isNetworkError) {
+        errorMsg = '⚠️ Could not connect to the server. Please make sure the backend is running on port 8000, then refresh the page.';
+      } else if (statusCode === 422) {
+        errorMsg = '⚠️ Your message could not be processed. Please try rephrasing your question.';
+      } else if (statusCode === 500) {
+        errorMsg = '⚠️ The server encountered an internal error. Please try again shortly.';
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered an issue connecting to the knowledge engine. Please check that the backend is running.',
+          content: errorMsg,
         },
       ]);
     } finally {

@@ -24,6 +24,58 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def _seed_demo_users():
+    """Seed demo/admin users into the database if they don't already exist."""
+    from sqlalchemy import select
+    from app.core.database import AsyncSessionLocal
+    from app.models.user import User
+    from app.core.security import hash_password
+
+    demo_accounts = [
+        {
+            "email": "citizen@example.com",
+            "password": "password123",
+            "full_name": "Demo Citizen",
+            "is_admin": False,
+            "age": 32,
+            "gender": "male",
+            "annual_income": 180000,
+            "education": "graduate",
+            "occupation": "farmer",
+            "category": "OBC",
+            "state": "Uttar Pradesh",
+            "disability": False,
+            "marital_status": "married",
+            "residence": "rural",
+            "land_holding": True,
+            "bank_account": True,
+        },
+        {
+            "email": "admin@example.com",
+            "password": "admin123",
+            "full_name": "Admin User",
+            "is_admin": True,
+            "category": "General",
+            "state": "Delhi",
+            "annual_income": 500000,
+        },
+    ]
+
+    async with AsyncSessionLocal() as db:
+        try:
+            for acc in demo_accounts:
+                result = await db.execute(select(User).where(User.email == acc["email"]))
+                if result.scalar_one_or_none() is None:
+                    plain_pw = acc.pop("password")
+                    user = User(hashed_password=hash_password(plain_pw), **acc)
+                    db.add(user)
+                    logger.info(f"✅ Seeded demo user: {acc['email']}")
+            await db.commit()
+        except Exception as e:
+            logger.error(f"Demo user seeding failed: {e}")
+            await db.rollback()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handle startup and shutdown events."""
@@ -32,6 +84,9 @@ async def lifespan(app: FastAPI):
     # Create database tables if they don't exist
     await create_tables()
     logger.info("✅ Database tables ready")
+
+    # Seed demo users (idempotent – skips if already exist)
+    await _seed_demo_users()
 
     # Start background scheduler (reminders, expiry checks)
     start_scheduler()
