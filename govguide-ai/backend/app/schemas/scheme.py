@@ -149,8 +149,8 @@ class DocumentRead(BaseModel):
     extracted_fields: Optional[Dict[str, Any]]
     validation_errors: Optional[Dict[str, Any]]
     suggested_fixes: Optional[Dict[str, Any]]
-    confidence_score: Optional[float]
-    is_expired: Optional[bool]
+    confidence_score: Optional[float] = None
+    is_expired: Optional[bool] = False
     uploaded_at: datetime
 
     model_config = {"from_attributes": True}

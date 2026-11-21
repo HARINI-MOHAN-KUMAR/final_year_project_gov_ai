@@ -1,7 +1,8 @@
 """Schemes API router – list, detail, and AI-powered recommendations."""
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, Depends, Query, HTTPException
+from pydantic import BaseModel
 
 from app.core.security import get_current_user
 from app.models.user import User
@@ -15,6 +16,51 @@ from app.schemas.scheme import (
 )
 
 router = APIRouter()
+
+
+class CheckEligibilityRequest(BaseModel):
+    scheme_id: str
+    user_profile: Dict[str, Any]
+
+
+@router.post("/check-eligibility", summary="Evaluate eligibility for a single scheme")
+async def check_single_eligibility(payload: CheckEligibilityRequest):
+    """
+    Evaluate user profile demographic fields against a specific scheme's rules.
+    Used by EligibilityModal and EligibilityScanner.
+    """
+    schemes = get_schemes()
+    scheme = next((s for s in schemes if s["id"].lower() == payload.scheme_id.lower()), None)
+    if not scheme:
+        raise HTTPException(status_code=404, detail=f"Scheme '{payload.scheme_id}' not found")
+
+    overall_pass, criteria = check_scheme_eligibility(payload.user_profile, scheme)
+
+    passed_count = sum(1 for c in criteria.values() if c["passed"])
+    total_criteria = max(len(criteria), 1)
+
+    if overall_pass:
+        status_str = "eligible"
+        confidence = 0.95
+    elif passed_count > 0:
+        status_str = "conditionally_eligible"
+        confidence = round(passed_count / total_criteria, 2)
+    else:
+        status_str = "ineligible"
+        confidence = 0.1
+
+    reasons = [c["reason"] for c in criteria.values() if c["passed"]]
+    missing = [c["reason"] for c in criteria.values() if not c["passed"]]
+
+    return {
+        "status": status_str,
+        "confidence": confidence,
+        "reasons": reasons,
+        "missing_criteria": missing,
+        "criteria_details": criteria,
+        "scheme_id": payload.scheme_id,
+        "scheme_name": scheme.get("name"),
+    }
 
 
 @router.get("/", response_model=List[SchemeFull], summary="List all schemes")

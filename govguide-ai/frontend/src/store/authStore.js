@@ -34,21 +34,16 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', password);
-
-      const res = await api.post('/auth/login', formData, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      const res = await api.post('/auth/login', {
+        email,
+        password,
       });
 
       const { access_token } = res.data;
       localStorage.setItem('govguide_token', access_token);
 
       // Fetch user profile
-      const userRes = await api.get('/auth/me', {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
+      const userRes = await api.get('/auth/me');
 
       localStorage.setItem('govguide_user', JSON.stringify(userRes.data));
       set({ token: access_token, user: userRes.data, isLoading: false });
